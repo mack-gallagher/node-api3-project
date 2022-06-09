@@ -5,6 +5,7 @@ const express = require('express');
 
 const User = require('./users-model');
 const Post = require('../posts/posts-model');
+const middleware = require('../middleware/middleware');
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.get('/', (req, res) => {
     })
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', middleware.validateUserId, (req, res) => {
   // RETURN THE USER OBJECT
   // this needs a middleware to verify user id
   User.getById(req.params.id)
@@ -43,26 +44,54 @@ router.post('/', (req, res) => {
     })
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', middleware.validateUserId, (req, res) => {
   // RETURN THE FRESHLY UPDATED USER OBJECT
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
+  User.update(req.params.id, req.body)
+    .then(result => {
+      res.json(result);
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    })
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', middleware.validateUserId, (req, res) => {
   // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
+
+  User.getById(req.params.id)
+    .then(result => {
+      User.remove(req.params.id)
+        .then(result2 => {
+          res.status(200).json(result);
+          return;
+        })
+        .catch(err => {
+          res.status(500).json(err);
+        })
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    })
 });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts', middleware.validateUserId, (req, res) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
 });
 
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts', middleware.validateUserId, (req, res) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
+  User.getById(req.params.id)
+    .then(result => {
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    })
 });
 
 // do not forget to export the router
