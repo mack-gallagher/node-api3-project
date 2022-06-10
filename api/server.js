@@ -10,7 +10,6 @@ server.use(middleware.logger);
 // global middlewares and the user's router need to be connected here
 
 const userRouter = require('./users/users-router');
-console.log(userRouter);
 server.use('/api/users', userRouter);
 
 module.exports = server;

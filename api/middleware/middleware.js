@@ -11,26 +11,41 @@ function logger(req, res, next) {
   next();
 }
 
-function validateUserId(req, res, next) {
+async function validateUserId(req, res, next) {
   // DO YOUR MAGIC
-  Post.getById(req.params.id)
+  await User.getById(req.params.id)
     .then(result => {
       if (!result) {
-        res.status(404).json(result);
+        res.status(404).json({ message: 'not found' });
+        return;
       }
+    })
+    .catch(err => {
+      res.status(404).json({ message: 'not found' });
+      return;
     })
 
   next();
 }
 
 function validateUser(req, res, next) {
-  // DO YOUR MAGIC
+  if (!(Object.keys(req.body).length === 1 && Object.keys(req.body)[0] === 'name')) {
+    res.status(400).json({ message: 'missing required name' });
+    return;
+  }
+
+  next(); 
 }
 
 function validatePost(req, res, next) {
-  // DO YOUR MAGIC
-}
 
+  if ((Object.keys(req.body)).length !== 1 || Object.keys(req.body).indexOf('text') === -1) {
+    res.status(400).json({ message: 'missing required text' });
+    return;
+  }
+
+  next();
+}
 // do not forget to expose these functions to other modules
 
 module.exports = { logger, validateUserId, validateUser, validatePost }

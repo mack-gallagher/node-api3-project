@@ -15,9 +15,6 @@ router.get('/', (req, res) => {
     .then(result => {
       res.status(200).json(result);
     })
-    .catch(err => {
-      res.status(500).json(err);
-    })
 });
 
 router.get('/:id', middleware.validateUserId, (req, res) => {
@@ -27,33 +24,24 @@ router.get('/:id', middleware.validateUserId, (req, res) => {
     .then(result => {
       res.status(200).json(result);
     })
-    .catch(err => {
-      res.status(500).json(err);
-    })
 });
 
-router.post('/', (req, res) => {
+router.post('/', middleware.validateUser, (req, res) => {
   // RETURN THE NEWLY CREATED USER OBJECT
   // this needs a middleware to check that the request body is valid
   User.insert(req.body)
     .then(result => {
       res.status(201).json(result);
     })
-    .catch(err => {
-      res.status(500).json(err);
-    })
 });
 
-router.put('/:id', middleware.validateUserId, (req, res) => {
+router.put('/:id', middleware.validateUserId, middleware.validateUser, (req, res) => {
   // RETURN THE FRESHLY UPDATED USER OBJECT
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
   User.update(req.params.id, req.body)
     .then(result => {
       res.json(result);
-    })
-    .catch(err => {
-      res.status(500).json(err);
     })
 });
 
@@ -72,27 +60,36 @@ router.delete('/:id', middleware.validateUserId, (req, res) => {
           res.status(500).json(err);
         })
     })
-    .catch(err => {
-      res.status(500).json(err);
-    })
 });
 
 router.get('/:id/posts', middleware.validateUserId, (req, res) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
+  Post.get()
+    .then(result => {
+      finalResult = result.reduce((acc, x) => {
+        if (x.user_id == req.params.id) {
+          acc.push(x);
+        }
+      return acc;
+      },[]);
+      res.status(200).json(finalResult);
+    })
 });
 
-router.post('/:id/posts', middleware.validateUserId, (req, res) => {
+router.post('/:id/posts', middleware.validateUserId, middleware.validatePost, (req, res) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
-  User.getById(req.params.id)
+
+  Post.insert({ user_id: req.params.id, text: req.body.text }) 
     .then(result => {
+      res.status(201).json(result);
+      return;
     })
-    .catch(err => {
-      res.status(500).json(err);
-    })
+ 
 });
+
 
 // do not forget to export the router
 
