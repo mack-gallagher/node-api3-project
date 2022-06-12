@@ -19,13 +19,14 @@ async function validateUserId(req, res, next) {
         res.status(404).json({ message: 'not found' });
         return;
       }
+
+      next();
     })
     .catch(err => {
       res.status(404).json({ message: 'not found' });
       return;
     })
 
-  next();
 }
 
 function validateUser(req, res, next) {
@@ -39,7 +40,7 @@ function validateUser(req, res, next) {
 
 function validatePost(req, res, next) {
 
-  if ((Object.keys(req.body)).length !== 1 || Object.keys(req.body).indexOf('text') === -1) {
+  if (Object.keys(req.body).indexOf('text') === -1) {
     res.status(400).json({ message: 'missing required text' });
     return;
   }
